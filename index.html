@@ -93,6 +93,13 @@
   #pview a{padding:10px 26px;border-radius:999px;border:1px solid #45d4ff;color:#fff;text-decoration:none;background:rgba(69,212,255,.15);letter-spacing:.1em;font-size:13px;cursor:pointer}
   #pview a:hover{background:rgba(69,212,255,.32)}
   #pview em{display:block;margin-top:14px;color:var(--dim);font-size:12px;font-style:normal;opacity:.7}
+  #rotate{display:none;position:fixed;inset:0;z-index:100;background:rgba(2,3,10,.97);align-items:center;justify-content:center;text-align:center;padding:24px}
+  #rotate .rbox b{display:block;font-family:'Cinzel',serif;font-size:20px;letter-spacing:.1em;font-weight:500;margin:14px 0 6px}
+  #rotate p{color:var(--dim);font-size:14px;margin-bottom:18px}
+  #rotate .rph{font-size:64px;display:inline-block;animation:rturn 2.4s ease-in-out infinite}
+  #rotate button{padding:9px 22px;border-radius:999px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.08);color:#fff;font:600 13px 'Quicksand',sans-serif;letter-spacing:.08em}
+  @keyframes rturn{0%,25%{transform:rotate(0)}65%,100%{transform:rotate(-90deg)}}
+  @media (pointer:coarse) and (orientation:portrait){#rotate:not(.off){display:flex}}
   #gview{position:fixed;inset:0;z-index:33;background:rgba(10,4,16,.92);display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(8px)}
   #gview.hidden{display:none}
   #gview .gcard{position:relative;width:min(94vw,560px);max-height:96vh;overflow:auto;text-align:center;padding:26px 22px 20px;border-radius:16px;border:2px solid #ff5577;background:#120a1e;box-shadow:0 0 50px rgba(255,85,119,.3);font-family:'Courier New',monospace}
@@ -191,6 +198,7 @@
 
 <div id="gate" class="hidden"><div class="gbox"><div class="gheart">♥</div><b>A secret word guards this room</b><p>This place is only for the one who knows the word.</p><input id="gateIn" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="24" placeholder="speak it here"><div class="gmsg" id="gateMsg"></div><button class="gbtn" id="gateGo">ENTER</button></div></div>
 <div id="pview" class="hidden"><div class="pbox"><img id="pImg" alt=""><div class="pinfo"><b id="pTitle"></b><div id="pTech"></div><p id="pDesc"></p><a id="pLink" target="_blank" rel="noopener"></a><em>Press E, Esc or click to close</em></div></div></div>
+<div id="rotate"><div class="rbox"><div class="rph">📱</div><b>Turn your phone sideways</b><p>This world is made for landscape.</p><button id="rGo">Continue anyway</button></div></div>
 <div id="gview" class="hidden"><div class="gcard"><button id="gClose" title="Close (Esc)">✕</button><b id="gTitle"></b><div id="gArea"></div><em id="gNote"></em></div></div>
 <div id="viewer" class="hidden"><div class="vbox"><canvas id="vCanvas"></canvas><div><b id="vTitle"></b><span id="vMeta"></span><p id="vDesc"></p><em>Press E, Esc or click to close</em></div></div></div>
 <div id="vignette"></div>
@@ -3947,7 +3955,17 @@ function loop(){
 state='title';showWorld();
 camera.position.set(0,0,14);
 {const e=$('enter');e.disabled=false;e.textContent='Enter'}
+function goLandscape(){
+  if(!isTouch)return;
+  try{
+    const el=document.documentElement,rf=el.requestFullscreen||el.webkitRequestFullscreen;
+    const lock=()=>{try{if(screen.orientation&&screen.orientation.lock)screen.orientation.lock('landscape').catch(()=>{})}catch(e){}};
+    if(rf&&!document.fullscreenElement&&!document.webkitFullscreenElement){const p=rf.call(el);if(p&&p.then)p.then(lock).catch(lock);else lock()}else lock();
+  }catch(e){}
+}
+$('rGo').onclick=()=>$('rotate').classList.add('off');
 $('enter').onclick=()=>{
+  goLandscape();
   initAudio();
   if(AC&&AC.state==='suspended')AC.resume();
   $('enter').disabled=true;$('titleUI').style.opacity=0;$('tTag').style.opacity=0;
