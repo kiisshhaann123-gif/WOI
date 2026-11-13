@@ -2220,10 +2220,10 @@ function signPlane(parent,title,sub,w,h,x,y,z,yaw,color){
   const tex=lateTex(1024,Math.round(1024*h/w),(g,W,H)=>{
     g.clearRect(0,0,W,H);g.fillStyle='rgba(16,11,26,.88)';g.fillRect(0,0,W,H);g.strokeStyle=color;g.lineWidth=6;g.strokeRect(10,10,W-20,H-20);
     g.textAlign='center';g.fillStyle='#fff';g.font='700 '+(H*(sub?.34:.42)|0)+'px Cinzel, Georgia, serif';g.fillText(title,W/2,H*(sub?.52:.62));
-    if(sub){g.font='500 '+(H*.16|0)+'px Quicksand, sans-serif';g.fillStyle='rgba(255,255,255,.75)';g.fillText(sub,W/2,H*.8)}
+    if(sub){/*SIGNFIX*/g.font='500 '+(H*.16|0)+'px Quicksand, sans-serif';g.fillStyle='rgba(255,255,255,.75)';const mw=W-90,ws=sub.split(' '),ls=[];let cu='';ws.forEach(wd=>{const t=cu?cu+' '+wd:wd;if(cu&&g.measureText(t).width>mw){ls.push(cu);cu=wd}else cu=t});ls.push(cu);const lh=H*.18;ls.forEach((ln,i)=>g.fillText(ln,W/2,H*.8-(ls.length-1)*lh*.5+i*lh))}
   });
   const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:tex,color:new THREE.Color(.85,.85,.85)}));
-  m.position.set(x,y,z);m.rotation.y=yaw;(parent||museum).add(m);return m;
+  m.position.set(x+Math.sin(yaw)*.03,y,z+Math.cos(yaw)*.03);m.rotation.y=yaw;(parent||museum).add(m);return m;
 }
 function bench(x,z,yaw,len){const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=yaw;museum.add(g);len=len||2.4;
   P(BOX(len,.16,.7),WOOD,0,.42,0,g);P(BOX(len-.1,.14,.6),VELV,0,.55,0,g);[-1,1].forEach(s=>P(BOX(.12,.42,.6),WOOD,s*(len/2-.12),.21,0,g));return g}
@@ -2745,7 +2745,7 @@ const GATE_HASH='686f746a95b6f836d7d70567c302c3f9ebb5ee0def3d1220ee9d4e9f34f5e13
   const hg=new THREE.ExtrudeGeometry(sh,{depth:.1,bevelEnabled:true,bevelSize:.03,bevelThickness:.03,bevelSegments:2});
   const hm=new THREE.Mesh(hg,EMI(0xff7ad0,2.2));hm.position.set(0,2.5,-38.3);hm.scale.setScalar(1.3);museum.add(hm);GATE.heart=hm;
   GATE.glow=addGlowSprite(museum,0,2.5,-38.1,0xff7ad0,3.2,.35);
-  GATE.label=labelSprite('Locked','Press E · speak the secret word','#ff9ad0',5);GATE.label.position.set(0,4.05,-37.9);museum.add(GATE.label);
+  GATE.label=labelSprite('Locked','Press E · speak the secret word','#ff9ad0',5);GATE.label.position.set(0,4.05,-37.7);museum.add(GATE.label);
   OBST.push(GATE.obst);
   // threshold floor: the museum floor ends at z=-38 and the chamber disc starts at z=-39, leaving a 1 m hole under the gate
   P(new THREE.PlaneGeometry(6.4,1.7).rotateX(-Math.PI/2),new THREE.MeshStandardMaterial({color:0x2a1a12,roughness:.5,metalness:.1,polygonOffset:true,polygonOffsetFactor:2,polygonOffsetUnits:2}),0,.01,-38.75);
