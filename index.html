@@ -169,6 +169,35 @@
   #jBtn{position:absolute;right:26px;bottom:176px;width:52px;height:52px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.1);color:#fff;font:600 13px 'Quicksand';pointer-events:auto;display:none}
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<style>@media (pointer:coarse){
+#help{display:none!important}
+#eBtn,#jBtn{display:none!important}
+#prompt{font-size:15px}
+#prompt.on{pointer-events:auto}
+#prompt kbd{min-width:34px;font-size:16px;padding:5px 11px}
+#woiJump,#woiRun{position:absolute;bottom:calc(60px + env(safe-area-inset-bottom));border-radius:50%;border:1px solid rgba(255,255,255,.45);background:rgba(255,255,255,.12);color:#fff;font:600 13px 'Quicksand',system-ui,sans-serif;pointer-events:auto;-webkit-tap-highlight-color:transparent;touch-action:none;}
+#woiJump{right:calc(34px + env(safe-area-inset-right));width:74px;height:74px}
+#woiRun{left:calc(34px + env(safe-area-inset-left));width:64px;height:64px}
+#woiJump:active{background:rgba(159,232,255,.35)}
+#woiRun.on{background:rgba(159,232,255,.4);border-color:#9fe8ff;box-shadow:0 0 14px rgba(159,232,255,.6)}
+}</style>
+<script>(function(){if(!matchMedia('(pointer: coarse)').matches)return;
+addEventListener('DOMContentLoaded',function(){
+ var $=function(i){return document.getElementById(i)};
+ var tc=$('touch');
+ var j=document.createElement('button');j.id='woiJump';j.textContent='Jump';
+ var fire=function(type){window.dispatchEvent(new KeyboardEvent(type,{code:'Space',key:' ',bubbles:true}))};
+ j.addEventListener('touchstart',function(e){e.preventDefault();e.stopPropagation();fire('keydown')},{passive:false});
+ var up=function(e){e.preventDefault();fire('keyup')};
+ j.addEventListener('touchend',up,{passive:false});j.addEventListener('touchcancel',up,{passive:false});
+ if(tc)tc.appendChild(j);
+ var r=document.createElement('button');r.id='woiRun';r.textContent='Run';
+ r.addEventListener('touchstart',function(e){e.preventDefault();e.stopPropagation();window.__woiRun=!window.__woiRun;r.classList.toggle('on',window.__woiRun)},{passive:false});
+ if(tc)tc.appendChild(r);
+ var p=$('prompt');
+ if(p)p.addEventListener('touchstart',function(e){if(!p.classList.contains('on'))return;e.preventDefault();var eb=$('eBtn');if(eb)eb.dispatchEvent(new Event('touchstart',{cancelable:true}))},{passive:false});
+});
+})();</script>
 </head>
 <body>
 <div id="stage"></div>
@@ -2734,18 +2763,20 @@ function updateLD(dt){
 
 
 /* ---------------- the secret door to Little Dino's chamber ---------------- */
-const GATE={locked:true,open:0,tries:0,leaves:[],heart:null,glow:null,obst:{cx:MX,cz:-38.5,c:1,s:0,x0:-3.3,x1:3.3,z0:-.9,z1:.9},label:null};
+const GATE={locked:true,open:0,tries:0,leaves:[],heart:null,glow:null,obst:{cx:MX,cz:-38.5,c:1,s:0,x0:-3.3,x1:3.3,z0:-.9,z1:1.5},label:null};
 const GATE_HASH='686f746a95b6f836d7d70567c302c3f9ebb5ee0def3d1220ee9d4e9f34f5e131';
 {
   const tex=canvasTex(256,512,(g,w,h)=>{const gr=g.createLinearGradient(0,0,0,h);gr.addColorStop(0,'#3a1230');gr.addColorStop(1,'#1d0a22');g.fillStyle=gr;g.fillRect(0,0,w,h);
     g.strokeStyle='#c9a24e';g.lineWidth=8;g.strokeRect(10,10,w-20,h-20);g.lineWidth=3;g.strokeRect(30,30,w-60,h-60);g.strokeRect(46,46,w-92,(h-92)/2-10);g.strokeRect(46,h/2+8,w-92,(h-92)/2-10)});
   const mat=new THREE.MeshStandardMaterial({map:tex,roughness:.5,metalness:.35,envMapIntensity:.4});
-  [-1,1].forEach(s=>{const m=P(BOX(2.74,4.5,.16),mat,s*1.4,2.28,-38.5);GATE.leaves.push(m);m.userData.x0=s*1.4});
+  /*GATE-PROUD*/const sideM=new THREE.MeshStandardMaterial({color:0x3a1230,roughness:.5,metalness:.35,envMapIntensity:.4});
+  [-1,1].forEach(s=>{const m=P(BOX(2.92,4.66,.16),[sideM,sideM,sideM,sideM,mat,mat],s*1.46,2.33,s>0?-37.79:-37.76);GATE.leaves.push(m);m.userData.x0=s*1.46});
   const sh=new THREE.Shape();sh.moveTo(0,.25);sh.bezierCurveTo(0,.6,-.55,.6,-.55,.2);sh.bezierCurveTo(-.55,-.15,-.2,-.35,0,-.6);sh.bezierCurveTo(.2,-.35,.55,-.15,.55,.2);sh.bezierCurveTo(.55,.6,0,.6,0,.25);
   const hg=new THREE.ExtrudeGeometry(sh,{depth:.1,bevelEnabled:true,bevelSize:.03,bevelThickness:.03,bevelSegments:2});
-  const hm=new THREE.Mesh(hg,EMI(0xff7ad0,2.2));hm.position.set(0,2.5,-38.3);hm.scale.setScalar(1.3);museum.add(hm);GATE.heart=hm;
-  GATE.glow=addGlowSprite(museum,0,2.5,-38.1,0xff7ad0,3.2,.35);
-  GATE.label=labelSprite('Locked','Press E · speak the secret word','#ff9ad0',5);GATE.label.position.set(0,4.05,-37.7);museum.add(GATE.label);
+  const hm=new THREE.Mesh(hg,EMI(0xff7ad0,2.2));hm.position.set(0,2.5,-37.55);hm.scale.setScalar(1.3);museum.add(hm);GATE.heart=hm;
+  GATE.glow=addGlowSprite(museum,0,2.5,-37.45,0xff7ad0,3.2,.35);
+  GATE.label=labelSprite('Locked','Press E · speak the secret word','#ff9ad0',5);GATE.label.position.set(0,4.05,-37.3);museum.add(GATE.label);
+  /*GATE-BACK*/GATE.back=P(BOX(5.98,4.8,.1),new THREE.MeshStandardMaterial({color:0x14081a,roughness:.9,metalness:0}),0,2.4,-38.3);
   OBST.push(GATE.obst);
   // threshold floor: the museum floor ends at z=-38 and the chamber disc starts at z=-39, leaving a 1 m hole under the gate
   P(new THREE.PlaneGeometry(6.4,1.7).rotateX(-Math.PI/2),new THREE.MeshStandardMaterial({color:0x2a1a12,roughness:.5,metalness:.1,polygonOffset:true,polygonOffsetFactor:2,polygonOffsetUnits:2}),0,.01,-38.75);
@@ -2773,7 +2804,7 @@ async function submitGate(){
 $('gateGo').onclick=submitGate;
 $('gateIn').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')submitGate();else if(e.key==='Escape'){$('gate').classList.add('hidden');closePanels()}});
 function updateGate(dt){
-  if(!GATE.locked&&GATE.open<1){GATE.open=Math.min(1,GATE.open+dt/1.8);
+  if(!GATE.locked&&GATE.open<1){GATE.open=Math.min(1,GATE.open+dt/1.8);if(GATE.back)GATE.back.visible=false;
     const e=GATE.open*GATE.open*(3-2*GATE.open);GATE.leaves.forEach(m=>m.position.x=m.userData.x0+Math.sign(m.userData.x0)*3*e);
     if(GATE.open>.25){const i=OBST.indexOf(GATE.obst);if(i>=0)OBST.splice(i,1)}
     GATE.heart.material.emissiveIntensity=2.2*(1-e);GATE.glow.material.opacity=.35*(1-e);GATE.label.visible=false;
@@ -3864,7 +3895,7 @@ function update(dt){
     if(keys.KeyA||keys.ArrowLeft)mx-=1;if(keys.KeyD||keys.ArrowRight)mx+=1;
     if(joy.id!==null){mx+=joy.x;mz+=joy.y}
     const len=Math.hypot(mx,mz);if(len>1){mx/=len;mz/=len}
-    const spd=(keys.ShiftLeft||keys.ShiftRight)?9.5:5.6;
+    const spd=(keys.ShiftLeft||keys.ShiftRight||(window.__woiRun&&joy.id!==null))?9.5:5.6;
     const sy=Math.sin(player.yaw),cy=Math.cos(player.yaw);
     const dx=(mx*cy+mz*sy)*spd*dt,dz=(-mx*sy+mz*cy)*spd*dt;
     const ok=(x,z)=>{const g=groundAt(x,z);return g===g&&g-player.pos.y<1.3&&!blockedAt(x,z)};
