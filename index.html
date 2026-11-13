@@ -2747,6 +2747,8 @@ const GATE_HASH='686f746a95b6f836d7d70567c302c3f9ebb5ee0def3d1220ee9d4e9f34f5e13
   GATE.glow=addGlowSprite(museum,0,2.5,-38.1,0xff7ad0,3.2,.35);
   GATE.label=labelSprite('Locked','Press E · speak the secret word','#ff9ad0',5);GATE.label.position.set(0,4.05,-37.9);museum.add(GATE.label);
   OBST.push(GATE.obst);
+  // threshold floor: the museum floor ends at z=-38 and the chamber disc starts at z=-39, leaving a 1 m hole under the gate
+  P(new THREE.PlaneGeometry(6.4,1.7).rotateX(-Math.PI/2),new THREE.MeshStandardMaterial({color:0x2a1a12,roughness:.5,metalness:.1,polygonOffset:true,polygonOffsetFactor:2,polygonOffsetUnits:2}),0,.01,-38.75);
 }
 function openGatePrompt(){
   paused=true;if(document.pointerLockElement)document.exitPointerLock();
