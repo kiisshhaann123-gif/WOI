@@ -186,7 +186,7 @@ addEventListener('DOMContentLoaded',function(){
  var $=function(i){return document.getElementById(i)};
  var tc=$('touch');
  var j=document.createElement('button');j.id='woiJump';j.textContent='Jump';
- var fire=function(type){window.dispatchEvent(new KeyboardEvent(type,{code:'Space',key:' ',bubbles:true}))};
+ var fire=function(type){window.dispatchEvent(new CustomEvent('woi-jump',{detail:type==='keydown'}))};
  j.addEventListener('touchstart',function(e){e.preventDefault();e.stopPropagation();fire('keydown')},{passive:false});
  var up=function(e){e.preventDefault();fire('keyup')};
  j.addEventListener('touchend',up,{passive:false});j.addEventListener('touchcancel',up,{passive:false});
@@ -2368,11 +2368,12 @@ function armillary(x,z,s){
   P(new THREE.SphereGeometry(.2,20,16),EMI(0xffd27a,2.4),0,0,0,g,false);addGlowSprite(g,0,0,0,0xffd27a,2.6,.4);
   MANIM.push(t=>{rs.forEach((m,i)=>{m.rotation.y=t*(.3+i*.12);m.rotation.z+=.002*(i+1)});g.position.y=2.3+Math.sin(t*1.2)*.05});
 }
-function frameBox(g,w,h,fw){
+function frameBox(g,w,h,fw,noLight){
   P(BOX(w+fw*2+.12,h+fw*2+.12,.1),GOLDM,0,0,.05,g);P(BOX(w+fw*2-.04,h+fw*2-.04,.13),WOOD,0,0,.06,g);
   P(BOX(w+.18,h+.18,.15),GOLDM,0,0,.075,g);P(BOX(w+.04,h+.04,.17),mm(0x20140b),0,0,.085,g);
   [-1,1].forEach(sx=>[-1,1].forEach(sy=>{const c=P(new THREE.SphereGeometry(.13,10,8),GOLDM,sx*(w/2+fw),sy*(h/2+fw),.11,g);c.scale.z=.45}));
   P(BOX(.7,.16,.07),GOLDM,0,h/2+fw+.08,.1,g);P(new THREE.SphereGeometry(.12,10,8),GOLDM,0,h/2+fw+.2,.1,g).scale.z=.5;
+  if(noLight)return;
   // brass picture light
   P(BOX(.05,.05,.5),BRASS,0,h/2+fw+.3,.27,g);P(CYL(.045,.045,Math.min(w*.8,1.3),8),BRASS,0,h/2+fw+.3,.52,g).rotation.z=Math.PI/2;
   P(CYL(.025,.025,Math.min(w*.7,1.2),8),EMI(0xffe2b0,2.2),0,h/2+fw+.26,.52,g,false).rotation.z=Math.PI/2;
@@ -2597,7 +2598,7 @@ ART_M.forEach((a,i)=>{const T=a.T,list=ARTFILES.motion[i]||[];if(!list.length)re
 const motionBars=[];
 function motionScreen(art,x,y,z,yaw,w,fw){
   const g=new THREE.Group();g.position.set(x,y,z);g.rotation.y=yaw;museum.add(g);const h=w/art.aspect;
-  frameBox(g,w,h,fw||.22);
+  frameBox(g,w,h,fw||.22,true);
   const mat=new THREE.MeshBasicMaterial({map:art.tex,color:new THREE.Color(1,1,1)});
   const pm=new THREE.Mesh(new THREE.PlaneGeometry(w,h),mat);pm.position.z=.175;g.add(pm);pm.userData.art=art;pm.userData.mat=mat;ARTMESH.push(pm);art.mat=mat;
   const bar=P(BOX(w,.07,.02),EMI(0xffc060,2.4),0,-h/2-.38,.1,g,false);bar.scale.x=.001;bar.position.x=-w/2;motionBars.push({bar,art,w});
@@ -3612,6 +3613,7 @@ addEventListener('keydown',e=>{
   if(e.code==='Space'&&state==='play')e.preventDefault();
 });
 addEventListener('keyup',e=>{keys[e.code]=false});
+addEventListener('woi-jump',e=>{keys.Space=!!e.detail});
 addEventListener('blur',()=>{for(const k in keys)keys[k]=false});
 
 function lookDelta(dx,dy){player.yaw-=dx*.0022*sens;player.pitch=clamp(player.pitch-dy*.0022*sens,-1.45,1.45)}
